@@ -10,7 +10,8 @@
 
         .folder-type-box {
             display: block;
-            margin-left: 12px;
+            /*margin-left: 12px;*/
+            margin-left: auto;
             background-color: #B0F;
             color: #ffffff;
             height: max-content;
@@ -105,27 +106,31 @@
         }
 
         # ------------------ return size for directory
-        function getDirSize($path){
-            $bytestotal = 0;
-            $path = realpath($path);
-            if ($path!==false && $path!='' && file_exists($path)){
-                foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)) as $object){
-                    $bytestotal += $object->getSize();
+        /*function getDirSize($path){
+            //if (count(explode("\\", $path)) > 2) {
+                $bytestotal = 0;
+                $path = realpath($path);
+                if ($path !== false && $path != '' && file_exists($path)){
+                    foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)) as $object){
+                        $bytestotal += filesize($object);
+                    }
                 }
-            }
-            return $bytestotal;
-        }
+                return $bytestotal;
+            //}
+        }*/
 
         # ------------------ return size 
         function getSize($sizeBit, $ott) {
-            if ($sizeBit < 1052197.3931623932) {
-                $sizeBit /= 1028.3333333333333; $ott = " KB";
-            } else if ($sizeBit < 1075296469.4980695) {
-                $sizeBit /= 1052197.3931623932; $ott = " MG";
-            } else if ($sizeBit < 1075296469498069500) {
-                $sizeBit /= 1075296469.4980695; $ott = " GB";
+            if (is_numeric($sizeBit)) {
+                if ($sizeBit < 1052197.3931623932) {
+                    $sizeBit /= 1028.3333333333333; $ott = " KB";
+                } else if ($sizeBit < 1075296469.4980695) {
+                    $sizeBit /= 1052197.3931623932; $ott = " MG";
+                } else if ($sizeBit < 1075296469498069500) {
+                    $sizeBit /= 1075296469.4980695; $ott = " GB";
+                }
+                return $sizeBit = round($sizeBit, 2) . $ott;
             }
-            return $sizeBit = round($sizeBit, 2) . $ott;
         }
 
         # ------------------
@@ -148,8 +153,9 @@
                         # ------------------
                         } else if (is_dir($itemPath)) {
                             if (basename($itemPath) != "." && basename($itemPath) != "..") {
-                                $sizeDes = getSize(getDirSize($itemPath), $ot);
-                                $_type = "<span class='folder-size-box'>$sizeDes</span><span class='folder-type-box'>Folder</span>";
+                                //$sizeDes = getSize(getDirSize($itemPath), $ot);
+                                //$_type = "<span class='folder-size-box'>$sizeDes</span><span class='folder-type-box'>Folder</span>";
+                                $_type = "<span class='folder-type-box'>Folder</span>";
                             }
                         }
                         echo createDirForm($item, $_type);
