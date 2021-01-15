@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="style.css">
 
     <style>
 
         .folder-type-box {
             display: block;
-            /*margin-left: 12px;*/
-            margin-left: auto;
+            margin-left: 12px;
             background-color: #B0F;
             color: #ffffff;
             height: max-content;
@@ -105,32 +104,72 @@
             return "<div class='dp-flex p-6 outer-shadow mt-20 mb-20'><button class='bn buttondir'>$content</button>$content2</div>";
         }
 
-        # ------------------ return size for directory
-        /*function getDirSize($path){
-            //if (count(explode("\\", $path)) > 2) {
-                $bytestotal = 0;
-                $path = realpath($path);
-                if ($path !== false && $path != '' && file_exists($path)){
-                    foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)) as $object){
-                        $bytestotal += filesize($object);
+        # ------------------ return size 
+        function formatSize($sizeByte) {
+            if (is_numeric($sizeByte)) {
+                if ($sizeByte >= 1073741824) {
+                    $sizeByte = number_format($sizeByte / 1073741824, 2) . " GB";
+                } else if ($sizeByte >= 1048576) {
+                    $sizeByte = number_format($sizeByte / 1048576, 2) . " MB";
+                } else if ($sizeByte >= 1024) {
+                    $sizeByte = number_format($sizeByte / 1024, 2) . " KB";
+                } else if ($sizeByte > 1) {
+                    $sizeByte .= " byte";
+                } else {
+                    $sizeByte = "0 byte";
+                }
+                return $sizeByte;
+            }
+        }
+        
+
+        /*function getAllSize($arr) {
+            $sizeByte = 0;
+            foreach($arr as $object) {
+                if (is_file($object)) {
+                    echo $object . "  ---FILE----  " . __LINE__ . "<br>" . "<br>";
+                    $sizeByte += filesize($object);
+                } else if (is_dir($object)) {
+                    // echo basename($object) . "<br>";
+                    if (basename($object) != "." && basename($object) != "..") {
+                        echo $object . "  ---FOLDER----  " . __LINE__ . "<br>" . "<br>";
+                        getAllSize(scandir($object . "\\"));
                     }
                 }
-                return $bytestotal;
-            //}
+            }
+            return $sizeByte;
         }*/
 
-        # ------------------ return size 
-        function getSize($sizeBit, $ott) {
-            if (is_numeric($sizeBit)) {
-                if ($sizeBit < 1052197.3931623932) {
-                    $sizeBit /= 1028.3333333333333; $ott = " KB";
-                } else if ($sizeBit < 1075296469.4980695) {
-                    $sizeBit /= 1052197.3931623932; $ott = " MG";
-                } else if ($sizeBit < 1075296469498069500) {
-                    $sizeBit /= 1075296469.4980695; $ott = " GB";
+        # ------------------ return size for directory
+        function getDirSize($path) {
+            $size = 0;
+            $path = realpath($path);
+            if ($path !== false && $path != '' && file_exists($path) && basename($path) != "." && basename($path) != "..") {
+                $pathArr = scandir($path);
+                $i = 0;
+                foreach ($pathArr as $item) {
+                    $item = $path . "\\" . $item;
+                    $pathArr[$i] = $item;
+                    $i++;
                 }
-                return $sizeBit = round($sizeBit, 2) . $ott;
+                // echo "<pre>";
+                // print_r($pathArr);
+                // echo "</pre>";
+                //$size = getAllSize($pathArr);
+                foreach($pathArr as $object) {
+                    if (is_file($object)) {
+                        // echo $object . "  ----F----  " . __LINE__ . "<br>" . "<br>";
+                        $size += filesize($object);
+                    } else if (is_dir($object)) {
+                        // echo basename($object) . "<br>";
+                        if (basename($object) != "." && basename($object) != "..") {
+                            // echo $object . "  ----D----  " . __LINE__ . "<br>" . "<br>";
+                            $size += getDirSize($object . "\\");
+                        }
+                    }
+                }
             }
+            return $size;
         }
 
         # ------------------
@@ -143,19 +182,24 @@
                         $itemPath = $path . $item;
                         $_type = "";
                         $typeDes = "";
-                        $sizeDes = "";
-                        $ot = "";
+                        $sizeDes = 0;
                         # ------------------
                         if (is_file($itemPath)) {
                             $typeDes = strchr(basename($item), ".");
-                            $sizeDes = getSize(filesize($itemPath), $ot);
+                            $sizeDes = formatSize(filesize($itemPath));
+                            if ($typeDes == "" || $typeDes == " ") {$typeDes = "Unknown";}
+                            if ($sizeDes == "" || $sizeDes == " ") {$sizeDes = "Unknown";}
                             $_type = "<span class='file-size-box'>$sizeDes</span><span class='file-type-box'>$typeDes</span>";
                         # ------------------
                         } else if (is_dir($itemPath)) {
                             if (basename($itemPath) != "." && basename($itemPath) != "..") {
-                                //$sizeDes = getSize(getDirSize($itemPath), $ot);
-                                //$_type = "<span class='folder-size-box'>$sizeDes</span><span class='folder-type-box'>Folder</span>";
-                                $_type = "<span class='folder-type-box'>Folder</span>";
+                                if (count(explode("\\", $itemPath)) > 2) {
+                                    $sizeDes = formatSize(getDirSize($itemPath));
+                                } else {
+                                    $sizeDes = "Unknown";
+                                }
+
+                                $_type = "<span class='folder-size-box'>$sizeDes</span><span class='folder-type-box'>Folder</span>";
                             }
                         }
                         echo createDirForm($item, $_type);
