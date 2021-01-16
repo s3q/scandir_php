@@ -5,51 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
 
     <style>
 
         .folder-type-box {
-            display: block;
+            display: flex;
+            align-items: center;
             margin-left: 12px;
             background-color: #B0F;
             color: #ffffff;
-            height: max-content;
             padding: 3px 10px;
             font-size: 12px;
             border-radius: 5px;
         }
 
         .folder-size-box {
-            display: block;
-            margin-left: auto;
+            display: flex;
+            align-items: center;
+            margin-left: 12px;
             background-color: #7094FF;
             color: #ffffff;
-            height: max-content;
             padding: 3px 10px;
             font-size: 12px;
             border-radius: 5px;
         }
 
         .file-type-box {
-            display: block;
+            display: flex;
+            align-items: center;
             margin-left: 12px;
             background-color: #E91E63;
             color: #ffffff;
-            height: max-content;
             padding: 3px 10px;
             font-size: 12px;
             border-radius: 5px;
         }
 
         .file-size-box {
-            display: block;
-            margin-left: auto;
+            display: flex;
+            align-items: center;
+            margin-left: 12px;
             background-color: #F2B500;
             color: #ffffff;
-            height: max-content;
             padding: 3px 10px;
             font-size: 12px;
             border-radius: 5px;
+        }
+
+        .buttondele {
+            margin-left: auto;
+            background-color: #FFDEDB;
         }
 
     </style>
@@ -59,9 +65,9 @@
 
     <?php 
     
-    if (isset($_POST["submit"])) {
-        $path = $_POST["path"];
-        $submit = $_POST["submit"];
+    if (isset($_GET["submit"])) {
+        $path = $_GET["path"];
+        $submit = $_GET["submit"];
         # ------------------
         if ($path != "") {
             if (is_dir($path)) {
@@ -72,28 +78,140 @@
                 $dir = scandir($path);
             }
             # ------------------
-            $_GET["pathValue"] = $path;
+            // $_GET["pathValue"] = $path;
         }
     }
 
+    if (isset($_POST["suCreateFile"])) {
+        $suCreateFile = $_POST["suCreateFile"];
+        $fileName = $_POST["fileName"];
+
+        if ($fileName != "") {
+            if (!file_exists($fileName)) {
+                file_put_contents($fileName, "");
+            }
+        }
+    }
+
+    if (isset($_POST["suCreateFolder"])) {
+        $suCreateFolder = $_POST["suCreateFolder"];
+        $folderName = $_POST["folderName"];
+
+        if ($folderName != "") {
+            if (!is_dir($folderName)) {
+                mkdir($folderName);
+            }
+        }
+    }
+
+    if (isset($_POST["suDelete"])) {
+        $suDelete = $_POST["suDelete"];
+        $cdorcfName = $_POST["cdorcfName"];
+
+        if ($cdorcfName != "") {
+            if (is_dir($cdorcfName)) {
+                rmdir($cdorcfName);
+            } elseif (is_file($cdorcfName) && file_exists($cdorcfName)) {
+                unlink($cdorcfName);
+            }
+        }
+    }
+
+
     ?>
-    <form action="" method="POST" class="form-inputs mt-50">
+    <form action="" method="GET" class="form-inputs mt-50">
         <div class="group-input">
             <input type="text" name="path" id="path" class="custom-input" 
                 <?php 
 
                 # ------------------
-                if (isset($_GET["pathValue"])) {
-                    $pathValue = $_GET["pathValue"];
-                    echo "value='{$pathValue}'";
-                } 
+            
+                // if (isset($_GET["pathValue"])) {
+                //     $pathValue = $_GET["pathValue"];
+                //     echo "value='{$pathValue}'";
+                // }
 
                 ?>
             >
-            <input type="submit" name="submit" id="submitpath" class="bn">
+            <input type="submit" value="submit" name="submit" id="submitpath" class="bn bn-purple">
         </div>
 
     </form>
+
+    <div class="form-inputs mt-50">
+        <?php 
+        
+        if (isset($_GET["pathValue"]) && is_dir($_GET["pathValue"]) || isset($_GET["path"]) && is_dir($_GET["path"])) {
+            echo 
+"<div>
+<button id='createFile' class='bn bn-tomato' aria-controls='alert-window-cf' data-fade='alert' data-duration='100'>create file</button>
+<button id='createFolder' class='bn bn-yellow' aria-controls='alert-window-cd' data-fade='alert' data-duration='100'>create folder</button>
+<button id='deletec' class='bn bn-red' aria-controls='alert-window-delete' data-fade='alert' data-duration='100'>delete</button>
+</div>";
+
+        }
+
+        ?>
+    </div>
+
+
+    <!--alert-window-->
+    <div class="backdrop-window" id="alert-window-cf" aria-expanded="false" data-event="click" style="display: none;" role="alert">
+        <div class="alert-window">
+            <div class="alert-window-head">
+                <button aria-controls="alert-window-cf" data-fade="alert" data-duration="100" class="bn-close"><i class="fas fa-times"></i></button>
+                <span class="color-red">CREATE FILE</span>
+            </div>
+            <div class="mt-10 p-20">
+                <form action="" method="POST" class="mt-50">
+                    <div class="group-input">
+                        <input type="text" name="fileName" id="fileName" class="custom-input">
+                        <input type="submit" value="create file" name="suCreateFile" id="suCreateFile" class="bn bn-tomato">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!--alert-window-->
+    <div class="backdrop-window" id="alert-window-cd" aria-expanded="false" data-event="click" style="display: none;" role="alert">
+        <div class="alert-window">
+            <div class="alert-window-head">
+                <button aria-controls="alert-window-cd" data-fade="alert" data-duration="100" class="bn-close"><i class="fas fa-times"></i></button>
+                <span class="color-red">CREATE FOLDER</span>
+            </div>
+            <div class="mt-10 p-20">
+                <form action="" method="POST" class="mt-50">
+                    <div class="group-input">
+                        <input type="text" name="folderName" id="folderName" class="custom-input">
+                        <input type="submit" value="create folder" name="suCreateFolder" id="suCreateFolder" class="bn bn-yellow">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!--alert-window-->
+    <div class="backdrop-window" id="alert-window-delete" aria-expanded="false" data-event="click" style="display: none;" role="alert">
+        <div class="alert-window">
+            <div class="alert-window-head">
+                <button aria-controls="alert-window-delete" data-fade="alert" data-duration="100" class="bn-close"><i class="fas fa-times"></i></button>
+                <span class="color-red">DELETE</span>
+            </div>
+            <div class="mt-10 p-20">
+                <form action="" method="POST" class="mt-50">
+                    <div class="group-input">
+                        <input type="text" name="cdorcfName" id="cdorcfName" class="custom-input">
+                        <input type="submit" value="delete" name="suDelete" id="suDelete" class="bn bn-red">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 
     <div class="form-inputs mt-40">
 
@@ -101,7 +219,11 @@
 
         # ------------------ create directory element
         function createDirForm($content, $content2 = "") {
-            return "<div class='dp-flex p-6 outer-shadow mt-20 mb-20'><button class='bn buttondir'>$content</button>$content2</div>";
+            $deleteButton = "";
+            if ($content != "." && $content != "..") {
+                $deleteButton = "<button class='bn buttondele'>delete</button>";
+            }
+            return "<div class='dp-flex p-6 outer-shadow mt-20 mb-20'><button class='bn buttondir'>$content</button>$deleteButton $content2</div>";
         }
 
         # ------------------ return size 
@@ -109,11 +231,11 @@
             if (is_numeric($sizeByte)) {
                 if ($sizeByte >= 1073741824) {
                     $sizeByte = number_format($sizeByte / 1073741824, 2) . " GB";
-                } else if ($sizeByte >= 1048576) {
+                } elseif ($sizeByte >= 1048576) {
                     $sizeByte = number_format($sizeByte / 1048576, 2) . " MB";
-                } else if ($sizeByte >= 1024) {
+                } elseif ($sizeByte >= 1024) {
                     $sizeByte = number_format($sizeByte / 1024, 2) . " KB";
-                } else if ($sizeByte > 1) {
+                } elseif ($sizeByte > 1) {
                     $sizeByte .= " byte";
                 } else {
                     $sizeByte = "0 byte";
@@ -173,7 +295,7 @@
         }
 
         # ------------------
-        if (isset($_POST["submit"])) {
+        if (isset($_GET["submit"])) {
             if ($path != "") {
                 if (is_dir($path)) {
                     $dir = scandir($path);
@@ -187,11 +309,11 @@
                         if (is_file($itemPath)) {
                             $typeDes = strchr(basename($item), ".");
                             $sizeDes = formatSize(filesize($itemPath));
-                            if ($typeDes == "" || $typeDes == " ") {$typeDes = "Unknown";}
-                            if ($sizeDes == "" || $sizeDes == " ") {$sizeDes = "Unknown";}
+                            if ($typeDes == "") {$typeDes = "Unknown";}
+                            if ($sizeDes == "") {$sizeDes = "Unknown";}
                             $_type = "<span class='file-size-box'>$sizeDes</span><span class='file-type-box'>$typeDes</span>";
                         # ------------------
-                        } else if (is_dir($itemPath)) {
+                        } elseif (is_dir($itemPath)) {
                             if (basename($itemPath) != "." && basename($itemPath) != "..") {
                                 if (count(explode("\\", $itemPath)) > 2) {
                                     $sizeDes = formatSize(getDirSize($itemPath));
@@ -209,79 +331,15 @@
                 }
             }
         }
+
+        //file_put_contents(addslashes($path) . "new.txt", "");
         
         ?>
 
     </div>
 
-
-    <script>
-
-        let buttonDir = document.querySelectorAll(".buttondir"),
-            inputPath = document.getElementById("path"),
-            submitPath = document.getElementById("submitpath");
-
-
-        console.log(buttonDir);
-
-        buttonDir.forEach(item => {
-
-            item.addEventListener('click', _ => {
-
-                if (item.textContent != "") {
-
-                    // ------------------
-                    inputPath.value += item.textContent;
-
-                    if (item.textContent == "." || item.textContent == "..") {
-
-                        arrBackOne = [];
-
-                        // ------------------
-                        if (inputPath.value[inputPath.value.length - 1] == ".") {
-
-                            arrBackOne = inputPath.value.split("\\");
-                            let pathback = "";
-
-                            // ------------------
-                            if (inputPath.value[inputPath.value.length - 1] == "." && inputPath.value[inputPath.value.length - 2] != ".") {
-
-                                // ------------------
-                                delete(arrBackOne[arrBackOne.length - 1]);
-                                delete(arrBackOne[arrBackOne.length - 2]);
-
-                                arrBackOne.forEach(i => {
-
-                                    // ------------------
-                                    pathback += i + "\\";
-
-                                });
-
-                                inputPath.value = pathback;
-
-                            // ------------------
-                            } else if (inputPath.value[inputPath.value.length - 1] + inputPath.value[inputPath.value.length - 2] == ".." && inputPath.value[inputPath.value.length - 3] != ".") {
-                                
-                                // ------------------
-                                pathback = arrBackOne[0] + "\\";
-
-                                inputPath.value = pathback;
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-                // ------------------
-                submitPath.click();
-
-            });
-
-        });
-
-    </script>
+    <script src="jquery.min.js"></script>
+    <script src="script.js"></script>
+    <script src="script2.js"></script>
 </body>
 </html>
